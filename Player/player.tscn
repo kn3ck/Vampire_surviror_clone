@@ -1,0 +1,82 @@
+[gd_scene load_steps=7 format=3 uid="uid://88wfpospp5uc"]
+
+[ext_resource type="Script" path="res://Player/player.gd" id="1_n08v2"]
+[ext_resource type="Texture2D" uid="uid://cg8rwqrjh3bod" path="res://Textures/Player/player_sprite.png" id="1_sw53f"]
+[ext_resource type="PackedScene" uid="uid://2losjxpprdfo" path="res://Utility/hurt_box.tscn" id="3_w7cui"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_uerq1"]
+radius = 4.46136
+height = 16.4787
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_n1pch"]
+size = Vector2(10, 18.5)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_57vii"]
+radius = 408.207
+
+[node name="Player" type="CharacterBody2D" groups=["player"]]
+script = ExtResource("1_n08v2")
+
+[node name="PlayerSprite" type="Sprite2D" parent="."]
+position = Vector2(-1, 0)
+scale = Vector2(0.831182, 0.970404)
+texture = ExtResource("1_sw53f")
+hframes = 2
+
+[node name="Camera2D" type="Camera2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, 1)
+scale = Vector2(0.896588, 0.970948)
+shape = SubResource("CapsuleShape2D_uerq1")
+
+[node name="walkTimer" type="Timer" parent="."]
+unique_name_in_owner = true
+wait_time = 0.2
+one_shot = true
+
+[node name="HurtBox" parent="." instance=ExtResource("3_w7cui")]
+collision_mask = 2
+
+[node name="CollisionShape2D" parent="HurtBox" index="0"]
+position = Vector2(0, 1.75)
+shape = SubResource("RectangleShape2D_n1pch")
+
+[node name="Attack" type="Node2D" parent="."]
+
+[node name="IceSpearTimer" type="Timer" parent="Attack"]
+unique_name_in_owner = true
+wait_time = 1.5
+
+[node name="IceSpearAttackTimer" type="Timer" parent="Attack/IceSpearTimer"]
+unique_name_in_owner = true
+wait_time = 0.075
+
+[node name="TornadoTimer" type="Timer" parent="Attack"]
+unique_name_in_owner = true
+wait_time = 3.0
+
+[node name="TornadoAttackTimer" type="Timer" parent="Attack/TornadoTimer"]
+unique_name_in_owner = true
+wait_time = 0.2
+
+[node name="JavelinBase" type="Node2D" parent="Attack"]
+unique_name_in_owner = true
+
+[node name="EnemyDetectionArea" type="Area2D" parent="."]
+collision_layer = 4
+collision_mask = 4
+monitorable = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EnemyDetectionArea"]
+shape = SubResource("CircleShape2D_57vii")
+
+[connection signal="hurt" from="HurtBox" to="." method="_on_hurt_box_hurt"]
+[connection signal="timeout" from="Attack/IceSpearTimer" to="." method="_on_ice_spear_timer_timeout"]
+[connection signal="timeout" from="Attack/IceSpearTimer/IceSpearAttackTimer" to="." method="_on_ice_spear_attack_timer_timeout"]
+[connection signal="timeout" from="Attack/TornadoTimer" to="." method="_on_tornado_timer_timeout"]
+[connection signal="timeout" from="Attack/TornadoTimer/TornadoAttackTimer" to="." method="_on_tornado_attack_timer_timeout"]
+[connection signal="body_entered" from="EnemyDetectionArea" to="." method="_on_enemy_detection_area_body_entered"]
+[connection signal="body_exited" from="EnemyDetectionArea" to="." method="_on_enemy_detection_area_body_exited"]
+
+[editable path="HurtBox"]

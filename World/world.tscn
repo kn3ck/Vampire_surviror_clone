@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3 uid="uid://dfrb87twofl1p"]
+
+[ext_resource type="Texture2D" uid="uid://d1uh2we0yw28h" path="res://Textures/dirt_full_new.png" id="1_tcsw0"]
+[ext_resource type="PackedScene" uid="uid://88wfpospp5uc" path="res://Player/player.tscn" id="2_1245v"]
+[ext_resource type="PackedScene" uid="uid://cnali7aooit60" path="res://Utility/enemy_spanwer.tscn" id="3_srge4"]
+
+[node name="World" type="Node2D"]
+
+[node name="Background" type="Sprite2D" parent="."]
+texture_filter = 2
+texture_repeat = 2
+position = Vector2(-1, -1)
+texture = ExtResource("1_tcsw0")
+region_enabled = true
+region_rect = Rect2(0, 0, 4000, 4000)
+
+[node name="Player" parent="." instance=ExtResource("2_1245v")]
+motion_mode = 1
+
+[node name="EnemySpanwer" parent="." instance=ExtResource("3_srge4")]
