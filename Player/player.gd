@@ -5,6 +5,11 @@ var movement_speed = 200.0
 var hp = 80
 var last_movement = Vector2.UP
 
+#Experiance
+var experience = 0
+var experience_level = 1
+var collected_expercience = 0
+
 #Attacks
 var iceSpear = preload("res://Player/Attack/ice_spear.tscn")
 var tornado = preload("res://Player/Attack/tornado.tscn")
@@ -32,14 +37,20 @@ var tornado_level = 0
 var javelin_ammo = 1
 var javelin_level = 1
 
-
+#Enemy Related
 var enemy_close = []
+
 
 @onready var sprite = $PlayerSprite
 @onready var walkTimer = get_node("%walkTimer")
 
+#GUI
+@onready var expBar = %ExperienceBar
+@onready var lblLevel = %lbl_level
+
 func _ready():
 	attack()
+	set_expbar(experience, calculate_expericencecap())
 
 func _physics_process(delta):
 	movement()
@@ -143,5 +154,50 @@ func _on_enemy_detection_area_body_entered(body):
 func _on_enemy_detection_area_body_exited(body):
 	if enemy_close.has(body):
 		enemy_close.erase(body)
+
+
+func _on_grab_area_area_entered(area):
+	if area.is_in_group("loot"):
+		area.target = self
+
+func _on_collect_area_area_entered(area):
+	if area.is_in_group("loot"):
+		var gem_exp = area.collect()
+		calculate_expericence(gem_exp)
+		
+func calculate_expericence(gem_exp):
+	var exp_required = calculate_expericencecap()
+	collected_expercience += gem_exp
+	if experience + collected_expercience >= exp_required: # levelup
+		collected_expercience -= exp_required-experience
+		experience_level += 1
+		print("Level:", experience_level)
+		lblLevel.text = str("Level: ", experience_level)
+		experience = 0
+		exp_required = calculate_expericencecap()
+		calculate_expericence(0)
+	else:
+		experience += collected_expercience
+		collected_expercience = 0
+		
+	set_expbar(experience, exp_required)
+	
+func calculate_expericencecap():
+	var exp_cap = experience_level
+	if experience_level < 20:
+		exp_cap = experience_level * 5
+	elif experience_level < 40:
+		exp_cap = 95 + (experience_level-19)*8
+	else:
+		exp_cap = 255 + (experience_level-39)*12
+		
+	return exp_cap
+	
+	
+func set_expbar(set_value = 1, set_max_value = 100):
+	expBar.value = set_value
+	expBar.max_value = set_max_value
+	
+	
 
 
