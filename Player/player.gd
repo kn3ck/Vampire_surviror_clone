@@ -23,19 +23,19 @@ var javelin = preload("res://Player/Attack/javelin.tscn")
 @onready var javelinBase = get_node("%JavelinBase")
 #IceSpear
 var icespear_ammo = 0
-var icespear_baseammo = 1 
+var icespear_baseammo = 0
 var icespear_attackspeed = 1.5
 var icespear_level = 0
 
 #zornadao
 var tornado_ammo = 0
-var tornado_baseammo = 3 
+var tornado_baseammo = 0 
 var tornado_attackspeed = 3.0
 var tornado_level = 0
 
 #Javelin 
-var javelin_ammo = 1
-var javelin_level = 1
+var javelin_ammo = 0
+var javelin_level = 0
 
 #Enemy Related
 var enemy_close = []
@@ -51,6 +51,16 @@ var enemy_close = []
 @onready var itemOptions = preload("res://Utility/item_option.tscn")
 @onready var upgradeOptions = %UpgradeOptions
 @onready var sndLevelUp = %snd_levelup
+
+#Upgrades
+var collected_upgrades = []
+var upgrade_options = []
+var armor = 0
+var speed = 0
+var spell_cooldown = 0
+var spell_size = 0
+var additional_attacks = 0
+
 
 func _ready():
 	attack()
@@ -213,6 +223,7 @@ func levelup():
 	var optionsmax = 3
 	while options < optionsmax:
 		var option_choice = itemOptions.instantiate()
+		option_choice.item = get_random_item()
 		upgradeOptions.add_child(option_choice)
 		options += 1
 		
@@ -222,7 +233,32 @@ func upgrade_character(upgrade):
 	var option_children = upgradeOptions.get_children()
 	for i in option_children:
 		i.queue_free()
+	upgrade_options.clear()
+	collected_upgrades.append(upgrade)
 	levelPanel.visible = false
 	levelPanel.position = Vector2(800, 50)
 	get_tree().paused = false
 	calculate_expericence(0)
+	
+func get_random_item():
+	var db_list = []
+	for i in UpgradeDb.UPGRADES:
+		if i in collected_upgrades or i in upgrade_options:
+			pass
+		elif UpgradeDb.UPGRADES[i]["type"] == "item":
+			pass
+		elif not UpgradeDb.UPGRADES[i]["prerequisite"].is_empty():
+			for n in UpgradeDb.UPGRADES[i]["prerequisite"]:
+				if not n in collected_upgrades:
+					pass
+				else:
+					db_list.append(i)
+		else:
+			db_list.append(i)
+	if not db_list.is_empty():
+		var random_item = db_list.pick_random()
+		upgrade_options.append(random_item)
+		return random_item
+	else:
+		return "food"
+			
